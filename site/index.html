@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+    // Apply saved theme and design skin before first paint (?skin=alt|classic overrides and is remembered)
+    (function () { try { var r = document.documentElement, q = new URLSearchParams(location.search).get("skin");
+      var t = localStorage.getItem("odp-theme"); if (t) r.dataset.theme = t;
+      if (q) localStorage.setItem("odp-skin", q);
+      if ((q || localStorage.getItem("odp-skin")) === "alt") r.dataset.skin = "alt"; } catch (e) {} })();
+  </script>
+  <title>Fire, Water &amp; Rock</title>
+  <meta name="description" content="A live hazard twin for British Columbia: wildfires, rivers, earthquakes and highway closures, with a weather-driven wildfire-starts forecast, flood-frequency analysis and earthquake recurrence odds." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;550;600;650;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Saira+Stencil+One&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./src/shared/theme.css" />
+  <link rel="stylesheet" href="./src/hazards/hazards.css" />
+  <link rel="stylesheet" href="./src/hazards/skin.css" />
+</head>
+<body class="hazards">
+  <header class="topbar">
+    <span class="title">Fire, Water &amp; Rock</span>
+    <span class="spacer"></span>
+    <button class="skin-btn" id="skin" type="button" data-skin-name="Field Ops"></button>
+    <button class="icon-btn" id="theme" type="button"></button>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div class="eyebrow" id="asof">British Columbia, right now</div>
+        <h1 class="hero-title">Fire, water &amp; rock</h1>
+        <p class="lede">A live hazard twin for BC. It tracks every wildfire, river gauge, earthquake and highway closure, with models for what comes next and how rare the big ones are.</p>
+        <div class="grid cols-4 tiles" id="tiles"></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head"><div>
+          <div class="eyebrow">Live map</div>
+          <h2>Everything happening at once</h2>
+          <p>Wildfires by status, rivers ranked against their own history for this time of year, earthquakes from the last 30 days and highway closures. Click anything for detail.</p>
+        </div></div>
+        <div class="map-shell card">
+          <div class="map-body">
+            <div id="map" class="map"></div>
+            <aside class="panel">
+              <div>
+                <div class="side-title">Layers</div>
+                <div class="layer-list" id="layers"></div>
+              </div>
+              <div id="side-lists"></div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head"><div>
+          <div class="eyebrow">Wildfire outlook</div>
+          <h2>How many fires will start this week?</h2>
+          <p id="outlook-sub">Expected new wildfires per fire centre over the next seven days. It comes from a model trained on 25 seasons of BC Wildfire Service records against each centre's heat, rain and accumulated dryness, driven by Environment Canada's GEM forecast.</p>
+        </div></div>
+        <div class="legend" id="outlook-legend"></div>
+        <div class="grid cols-3" id="outlook"></div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head"><div>
+          <div class="eyebrow">Wildfire model card</div>
+          <h2>Can weather predict fire starts?</h2>
+          <p>Every score is out of sample: each season is predicted by a model that never saw it. The comparison is a seasonal climatology, the usual number of starts for that centre and week.</p>
+        </div></div>
+        <div class="grid cols-4" id="fire-metrics"></div>
+        <div class="grid cols-2" style="margin-top:16px">
+          <div class="card">
+            <h3 class="card-title" id="season-title">This season: predicted vs recorded</h3>
+            <p class="note card-sub">Weekly new fires across BC. The predicted line uses only the weather that actually happened, from a model trained before this season began.</p>
+            <div class="legend" id="season-legend"></div>
+            <div class="chart" id="season"></div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">Whole seasons, 2000–2025</h3>
+            <p class="note card-sub">Total lightning-caused fires each season: recorded vs predicted (leave-one-season-out).</p>
+            <div class="chart" id="seasons"></div>
+          </div>
+        </div>
+        <div class="grid cols-2" style="margin-top:16px">
+          <div class="card">
+            <h3 class="card-title">What drives the model</h3>
+            <p class="note card-sub">Loss of fit when each group of related inputs is shuffled together (lightning-fire model). Shares of the total.</p>
+            <div class="chart" id="importance"></div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">Seventy-five years of fire</h3>
+            <p class="note card-sub">Area burned each year, split by cause. 2023 burned more than any year on record.</p>
+            <div class="legend" id="burn-legend"></div>
+            <div class="chart" id="burned"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head"><div>
+          <div class="eyebrow">Water</div>
+          <h2>November 2021: how rare was the atmospheric river?</h2>
+          <p>Daily flow through the November 2021 storm against the typical range for those dates. Return periods come from a Gumbel fit to each gauge's annual peaks before 2021, so they say how surprising the flood was beforehand.</p>
+        </div></div>
+        <div class="grid cols-4" id="hydrographs"></div>
+        <div class="card" style="margin-top:16px">
+          <h3 class="card-title">Return periods</h3>
+          <p class="note card-sub">Bars show the central estimate on a log scale; whiskers show the 80% bootstrap range. The pre-2021 fits imply about how many years you'd wait, on average, for a peak that big.</p>
+          <div class="chart" id="rp"></div>
+          <details class="table-view"><summary>Table view</summary><div class="table-scroll" id="rp-table"></div></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <div class="section-head"><div>
+          <div class="eyebrow">Rock</div>
+          <h2>What are the odds of a big earthquake?</h2>
+          <p>Gutenberg–Richter recurrence from 55 years of USGS records: small quakes are common, big ones rare, in a straight line on a log scale. Extending that line gives the yearly rate of larger events.</p>
+        </div>
+        <div class="seg" id="zones" role="group" aria-label="Zone"></div></div>
+        <div class="grid cols-3" id="quake-tiles"></div>
+        <div class="grid cols-2" style="margin-top:16px">
+          <div class="card">
+            <h3 class="card-title" id="fmd-title">Magnitude–frequency</h3>
+            <p class="note card-sub">Earthquakes per year at or above each magnitude (log scale), with the fitted line.</p>
+            <div class="legend" id="fmd-legend"></div>
+            <div class="chart" id="fmd"></div>
+          </div>
+          <div class="card prose">
+            <h3>The one this can't see</h3>
+            <p>This catalogue covers crustal and deep (intraslab) earthquakes. It can't capture the Cascadia subduction zone, which hasn't ruptured since January 1700, before records began. Geologists estimate a magnitude 9 roughly every 500 years on average, from offshore turbidite and coastal subsidence records. That risk sits on top of the odds shown here.</p>
+            <h3 style="margin-top:16px">Largest recorded in this zone</h3>
+            <ul id="biggest"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="wrap">
+        <div class="grid cols-2">
+          <div class="card prose">
+            <h3>Method</h3>
+            <p><b>Wildfire starts.</b> I count new fires per day per fire centre and cause (lightning vs people) for April–October, 2000–2025. Weather features are the centre's ECCC station heat, three-day heat, temperature anomaly, rain over 1, 7 and 30 days, days since rain, and a dryness index (heat accumulated since the last soaking). The model is Poisson gradient boosting, validated leave-one-season-out. The forecast runs it on Environment Canada GEM forecasts via Open-Meteo.</p>
+            <p><b>Rivers.</b> Each live reading is ranked against that gauge's daily means within ±7 days of the date, 1991 onward (flow where it's measured, otherwise water level).</p>
+            <p><b>Floods.</b> I fit a Gumbel distribution by maximum likelihood to water-year (Oct–Sep) annual maximum daily flows before the 2021 event, with a 400-draw bootstrap for the range. A 3-parameter GEV is kept as a sensitivity check. For the Tulameen and Chilliwack it puts an upper bound on flows below what 2021 delivered, which is itself a sign of how far outside experience the storm was.</p>
+            <p><b>Earthquakes.</b> Magnitude of completeness is estimated by maximum curvature + 0.2. The b-value is the Aki–Utsu maximum-likelihood estimate with a bootstrap range, and probabilities assume a Poisson process.</p>
+          </div>
+          <div class="card prose">
+            <h3>Honest limitations</h3>
+            <ul>
+              <li>Lightning itself isn't in the data. The model sees only heat and dryness, so it can say a day is primed for lightning fires but not where storms will cross.</li>
+              <li>People-caused fires depend on campfire bans, holidays and enforcement as much as weather. The model barely beats climatology at ranking whole seasons for them.</li>
+              <li>One weather station stands in for each fire centre, and some centres are the size of a small country.</li>
+              <li>Daily mean flow understates instantaneous peaks: the Coquihalla's real crest was higher than shown. Extrapolating any fit beyond about twice the record length is shaky, so read 500-year figures as "far outside experience".</li>
+              <li>Earthquake odds extrapolate a 55-year catalogue to magnitudes it barely contains.</li>
+            </ul>
+            <h3 style="margin-top:16px">Data sources</h3>
+            <ul class="sources">
+              <li><a href="https://catalogue.data.gov.bc.ca/">BC Wildfire Service</a>: current fire locations and perimeters, and historical incidents (DataBC WFS, OGL-BC)</li>
+              <li><a href="https://api.weather.gc.ca/">Environment and Climate Change Canada</a>: real-time and historical hydrometric data, daily climate (OGL-Canada)</li>
+              <li><a href="https://earthquake.usgs.gov/fdsnws/event/1/">USGS ComCat</a> earthquake catalogue</li>
+              <li><a href="https://api.open511.gov.bc.ca/help">DriveBC Open511</a> road events (OGL-BC)</li>
+              <li>Weather forecasts: ECCC GEM via <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0)</li>
+              <li>Basemap © <a href="https://openfreemap.org">OpenFreeMap</a>, © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a></li>
+            </ul>
+            <p class="note" id="generated"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="site"><div class="wrap">Fire, Water &amp; Rock is part of an open-data portfolio. Live layers refresh daily.</div></footer>
+  <script type="module" src="./src/hazards/main.js"></script>
+</body>
+</html>
