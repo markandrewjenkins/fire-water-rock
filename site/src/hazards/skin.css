@@ -20,7 +20,8 @@
   --radius: 0px;
   --font: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
-  --ops-stencil: "Saira Stencil One", "Big Shoulders Stencil Display", Impact, sans-serif;
+  --ops-stencil: "Saira Stencil One", "Big Shoulders Stencil Display", Impact, sans-serif;   /* hero title only */
+  --ops-head: "Big Shoulders Display", "Barlow Condensed", Impact, sans-serif;            /* solid signage face for sub-headings */
   --ops-cond: "Barlow Condensed", "Barlow", sans-serif;
   --ops-rule: #1c1f19;
   --ops-rule-soft: rgba(28, 31, 25, 0.28);
@@ -187,7 +188,7 @@
 :root[data-skin="alt"] body.hazards .ops-sitrep-in { display: flex; align-items: stretch; min-height: 38px; }
 :root[data-skin="alt"] body.hazards .ops-sr-tag {
   display: flex; align-items: center; gap: 8px; padding: 0 14px 0 22px; position: relative;
-  font: 400 15px/1 var(--ops-stencil); letter-spacing: 0.08em; color: var(--ops-strip-val);
+  font: 800 15px/1 var(--ops-head); letter-spacing: 0.1em; color: var(--ops-strip-val);
 }
 :root[data-skin="alt"] body.hazards .ops-sr-tag::before {
   content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 10px;
@@ -278,7 +279,7 @@
   content: ""; position: absolute; top: -1.5px; left: 0; width: 64px; height: 4px; background: var(--accent);
 }
 :root[data-skin="alt"] body.hazards .section-head h2 {
-  font: 400 clamp(24px, 3vw, 34px)/1.12 var(--ops-stencil); letter-spacing: 0.01em; margin-top: 10px;
+  font: 800 clamp(26px, 3.2vw, 38px)/1.08 var(--ops-head); letter-spacing: 0.005em; margin-top: 10px; text-transform: uppercase;
 }
 :root[data-skin="alt"] body.hazards .section-head p { color: var(--ink-2); font-size: 15px; }
 

@@ -1,14 +1,17 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-page="hazards">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script>
-    // Apply saved theme and design skin before first paint (?skin=alt|classic overrides and is remembered)
+    // Apply saved theme and design skin before first paint. <html data-skins="alt herbarium …"> lists this page's
+    // themed designs; ?skin=<id>|classic overrides and is remembered. "alt" is shared across pages; other ids per page.
     (function () { try { var r = document.documentElement, q = new URLSearchParams(location.search).get("skin");
       var t = localStorage.getItem("odp-theme"); if (t) r.dataset.theme = t;
-      if (q) localStorage.setItem("odp-skin", q);
-      if ((q || localStorage.getItem("odp-skin")) === "alt") r.dataset.skin = "alt"; } catch (e) {} })();
+      var multi = !!r.dataset.skins, ok = (r.dataset.skins || "alt").split(" "), pk = "odp-skin:" + (r.dataset.page || location.pathname);
+      if (q) { if (multi) localStorage.setItem(pk, q); if (q === "alt" || q === "classic") localStorage.setItem("odp-skin", q); }
+      var s = q || (multi && localStorage.getItem(pk)) || localStorage.getItem("odp-skin");
+      if (ok.indexOf(s) >= 0) r.dataset.skin = s; } catch (e) {} })();
   </script>
   <title>Fire, Water &amp; Rock</title>
   <meta name="description" content="A live hazard twin for British Columbia: wildfires, rivers, earthquakes and highway closures, with a weather-driven wildfire-starts forecast, flood-frequency analysis and earthquake recurrence odds." />
@@ -16,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;550;600;650;700&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Saira+Stencil+One&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Saira+Stencil+One&family=Big+Shoulders+Display:wght@700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./src/shared/theme.css" />
   <link rel="stylesheet" href="./src/hazards/hazards.css" />
   <link rel="stylesheet" href="./src/hazards/skin.css" />
